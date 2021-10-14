@@ -49,8 +49,7 @@ for file in tqdm(files):
         train_split = "valid/"
     else:
         train_split = "train/"
-    #testのみ作る
-    train_split = "test/"
+        
     total_index_train_split += 1
     dest_file = outputdir + train_split + file.split('/')[-1] + '_processed/'
     os.makedirs(dest_file, exist_ok=True)
@@ -126,7 +125,7 @@ for file in tqdm(files):
     for rgb_file in tqdm(rgb_files):
         rgb = cv2.imread(rgb_file)
 
-        cropped = rgb[242:434, 152:344] #クロップ
+        cropped = rgb[242-16:434+16, 152-16:344+16] #クロップ
 
         save_filepath = dest_file + str(total_index_rgb).zfill(zfill_number) + "_rgb.jpg"
         cv2.imwrite(save_filepath, cropped)
