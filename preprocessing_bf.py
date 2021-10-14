@@ -35,8 +35,10 @@ print("outputdir = " + outputdir)
 zfill_number = 5 #データセットのファイルの連番の桁数（0001.jpgなら4，00001なら5）
 total_index_y = 1
 total_index_meta = 1
-total_index_rgb = 1
-total_index_depth = 1
+total_index_rgb_before = 1
+total_index_depth_before = 1
+total_index_rgb_after = 1
+total_index_depth_after = 1
 total_index_hand = 1
 total_index_train_split = 1
 
@@ -120,16 +122,55 @@ for file in tqdm(files):
         total_index_meta = total_index_meta + 1
     meta_file.close()
 
-        ############## RGB processing ###############    
-    rgb_files = sorted(glob.glob(file+"/*_rgb.jpg"))
+        ############## RGB_before processing ###############    
+    rgb_files = sorted(glob.glob(file+"/*_rgb_before.jpg"))
     for rgb_file in tqdm(rgb_files):
         rgb = cv2.imread(rgb_file)
 
         cropped = rgb[242-16:434+16, 152-16:344+16] #クロップ
 
-        save_filepath = dest_file + str(total_index_rgb).zfill(zfill_number) + "_rgb.jpg"
+        save_filepath = dest_file + str(total_index_rgb_before).zfill(zfill_number) + "_rgb_before.jpg"
         cv2.imwrite(save_filepath, cropped)
-        total_index_rgb += 1
+        total_index_rgb_before += 1
+
+
+        ############### PROCESS DEPTH_before ############################
+        ############## Generate grid  for Depth images ###############
+    depth_files = sorted(glob.glob(file+"/*_depth_before.csv"))
+    for depth_file in tqdm(depth_files):
+        depth_file = np.loadtxt(depth_file)
+
+        depth_patch = depth_file[242-16:434+16, 152-16:344+16]
+        depth_image = transform_depth(depth_patch)
+
+        save_filepath = dest_file + str(total_index_depth_before).zfill(zfill_number) + "_depth_before.jpg" #クロップした画像を保存するパス
+        cv2.imwrite(save_filepath, depth_image)
+        total_index_depth_before += 1
+
+        ############## RGB_after processing ###############    
+    rgb_files = sorted(glob.glob(file+"/*_rgb_after.jpg"))
+    for rgb_file in tqdm(rgb_files):
+        rgb = cv2.imread(rgb_file)
+
+        cropped = rgb[242-16:434+16, 152-16:344+16] #クロップ
+
+        save_filepath = dest_file + str(total_index_rgb_after).zfill(zfill_number) + "_rgb_after.jpg"
+        cv2.imwrite(save_filepath, cropped)
+        total_index_rgb_after += 1
+
+
+        ############### PROCESS DEPTH_after ############################
+        ############## Generate grid  for Depth images ###############
+    depth_files = sorted(glob.glob(file+"/*_depth_after.csv"))
+    for depth_file in tqdm(depth_files):
+        depth_file = np.loadtxt(depth_file)
+
+        depth_patch = depth_file[242-16:434+16, 152-16:344+16]
+        depth_image = transform_depth(depth_patch)
+
+        save_filepath = dest_file + str(total_index_depth_after).zfill(zfill_number) + "_depth_after.jpg" #クロップした画像を保存するパス
+        cv2.imwrite(save_filepath, depth_image)
+        total_index_depth_after += 1
 
         ############## Handcamera processing ###############
     hand_files = sorted(glob.glob(file+"/*_hand.jpg"))
@@ -142,20 +183,6 @@ for file in tqdm(files):
         save_filepath = dest_file + str(total_index_hand).zfill(zfill_number) + "_hand.jpg" #クロップした画像を保存するパス
         cv2.imwrite(save_filepath, target_image)
         total_index_hand += 1
-
-        ############### PROCESS DEPTH ############################
-        ############## Generate grid  for Depth images ###############
-    depth_files = sorted(glob.glob(file+"/*_depth.csv"))
-    for depth_file in tqdm(depth_files):
-        depth_file = np.loadtxt(depth_file)
-
-        depth_patch = depth_file[242:434, 152:344]
-        depth_image = transform_depth(depth_patch)
-
-        save_filepath = dest_file + str(total_index_depth).zfill(zfill_number) + "_depth.jpg" #クロップした画像を保存するパス
-        cv2.imwrite(save_filepath, depth_image)
-        total_index_depth += 1
-
 #ブレエエ
 #ブレエエブレエエ
 #ブレエエブレエエブレエエブレエエブレエエブ
